@@ -22,6 +22,7 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register(r'crab', views.CrabViewSet, base_name='crab')
+router.register(r'customer', views.CustomerViewSet, base_name='customer')
 # router.register(r'users', views.UserViewSet)
 # router.register(r'groups', views.GroupViewSet)
 

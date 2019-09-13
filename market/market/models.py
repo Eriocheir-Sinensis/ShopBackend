@@ -1,8 +1,9 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class Customer(models.Model):
+class Customer(User):
     cid = models.AutoField(primary_key=True)
     name = models.CharField(_('姓名'), max_length=80)
     phone = models.CharField(_('电话号码'), max_length=80)

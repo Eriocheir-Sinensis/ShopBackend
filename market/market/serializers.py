@@ -1,8 +1,18 @@
+import traceback
+from .models import Customer
 from rest_framework import serializers
+
+
+class CustomerSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Customer
+        fields = '__all__'
 
 
 class CrabSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
+        request = self.context.get('request')
         return {
             'id': instance.cid,
             'name': instance.name,
@@ -10,6 +20,6 @@ class CrabSerializer(serializers.BaseSerializer):
             'price': "{}{}".format(instance.price, instance.net),
             'original_price': "{}{}".format(instance.original_price, instance.net) if instance.original_price else None,
             'description': instance.description,
-            'images': [i.pic.url for i in instance.images.all()]
+            'images': [request.build_absolute_uri(i.pic.url) for i in instance.images.all()]
         }
 
