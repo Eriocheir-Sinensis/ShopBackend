@@ -1,20 +1,7 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
-
-class Customer(User):
-    cid = models.AutoField(primary_key=True)
-    name = models.CharField(_('姓名'), max_length=80)
-    phone = models.CharField(_('电话号码'), max_length=80)
-    address = models.CharField(_('地址'), max_length=300)
-
-    class Meta:
-        verbose_name = _('客户')
-        verbose_name_plural = _('客户')
-
-    def __str__(self):
-        return self.name
+from ..order.models import Order
 
 
 class Crab(models.Model):
@@ -42,34 +29,6 @@ class CrabImage(models.Model):
     class Meta:
         verbose_name = _('图片')
         verbose_name_plural = _('图片')
-
-
-ORDER_STATUS = (
-    ("未付款", "未付款"),
-    ("已付款", "已付款"),
-    ("已发货", "已发货"),
-    ("完成", "完成")
-)
-
-
-class Order(models.Model):
-    oid = models.AutoField(primary_key=True)
-    customer = models.ForeignKey(Customer, verbose_name=_('客户'), on_delete=models.CASCADE)
-    status = models.CharField(_('状态'), choices=ORDER_STATUS, max_length=10, default="未付款")
-
-    class Meta:
-        verbose_name = _('订单')
-        verbose_name_plural = _('订单')
-
-
-class Cart(models.Model):
-    cid = models.AutoField(primary_key=True)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    crabs = models.ForeignKey(Crab, related_name='crabs', on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name = _('购物车')
-        verbose_name_plural = _('购物车')
 
 
 class LineItem(models.Model):

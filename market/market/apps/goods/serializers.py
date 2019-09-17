@@ -1,13 +1,4 @@
-import traceback
-from .models import Customer
 from rest_framework import serializers
-
-
-class CustomerSerializer(serializers.HyperlinkedModelSerializer):
-
-    class Meta:
-        model = Customer
-        fields = '__all__'
 
 
 class CrabSerializer(serializers.BaseSerializer):
@@ -22,4 +13,3 @@ class CrabSerializer(serializers.BaseSerializer):
             'description': instance.description,
             'images': [request.build_absolute_uri(i.pic.url) for i in instance.images.all()]
         }
-
