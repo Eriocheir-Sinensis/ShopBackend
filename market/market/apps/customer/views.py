@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.authtoken import views
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.signals import user_logged_in
@@ -16,8 +17,25 @@ class CustomerViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewse
     permission_classes = (IsAuthenticated, )
 
 
+class CustomerSelfViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+    permission_classes = (IsAuthenticated, )
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.request.user
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return
+
+
 class LoginView(views.ObtainAuthToken, viewsets.ViewSet):
     serializer_class = AuthTokenSerializer
+    permission_classes = (AllowAny, )
 
     def log(self, request, *args, **kwargs):
         status_code = status.HTTP_200_OK

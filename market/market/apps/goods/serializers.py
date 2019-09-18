@@ -1,15 +1,24 @@
 from rest_framework import serializers
+from .models import Crab
 
 
-class CrabSerializer(serializers.BaseSerializer):
-    def to_representation(self, instance):
+class CrabSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='cid')
+    images = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Crab
+        fields = (
+            "id",
+            "name",
+            "size",
+            "price",
+            "original_price",
+            "net",
+            "description",
+            "images"
+        )
+
+    def get_images(self, obj):
         request = self.context.get('request')
-        return {
-            'id': instance.cid,
-            'name': instance.name,
-            'size': instance.size,
-            'price': "{}{}".format(instance.price, instance.net),
-            'original_price': "{}{}".format(instance.original_price, instance.net) if instance.original_price else None,
-            'description': instance.description,
-            'images': [request.build_absolute_uri(i.pic.url) for i in instance.images.all()]
-        }
+        return [request.build_absolute_uri(i.pic.url) for i in obj.images.all()]

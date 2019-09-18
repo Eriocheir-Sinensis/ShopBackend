@@ -5,7 +5,7 @@ from .models import Customer
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ('name', 'phone', 'address')
     readonly_fields = ('cid', )
-    exclude = ('username', 'first_name', 'last_name', 'email', 'is_stuff', 'groups', 'user_permissions')
+    exclude = ('first_name', 'last_name', 'email', 'is_stuff', 'groups', 'user_permissions')
     inlines = []
 
 

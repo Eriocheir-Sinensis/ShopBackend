@@ -1,19 +1,14 @@
 from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from rest_framework import mixins
 from .models import Crab
 from .serializers import CrabSerializer
 
 
-class CrabViewSet(viewsets.ViewSet):
+class CrabViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    permission_classes = (AllowAny, )
+    queryset = Crab.objects.all()
+    serializer_class = CrabSerializer
 
-    def list(self, request):
-        queryset = Crab.objects.all()
-        serializer = CrabSerializer(queryset, context={'request': request}, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        queryset = Crab.objects.all()
-        crab = get_object_or_404(queryset, pk=pk)
-        serializer = CrabSerializer(crab, context={'request': request})
-        return Response(serializer.data)
