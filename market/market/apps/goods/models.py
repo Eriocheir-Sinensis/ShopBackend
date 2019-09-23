@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from ..order.models import Order
 
 
 class Crab(models.Model):
@@ -33,7 +32,6 @@ class CrabImage(models.Model):
 
 class LineItem(models.Model):
     lid = models.AutoField(primary_key=True)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
     crab = models.ForeignKey(Crab, verbose_name=_('大闸蟹'), on_delete=models.CASCADE)
     amount = models.IntegerField(_('数量'), default=0)
 

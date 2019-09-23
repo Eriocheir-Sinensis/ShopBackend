@@ -3,12 +3,8 @@ from .models import Order
 from ..goods.models import LineItem
 
 
-class LineItemAdmin(admin.TabularInline):
-    model = LineItem
-
-
 class OrderAdmin(admin.ModelAdmin):
-    inlines = [LineItemAdmin, ]
+    inlines = [ ]
 
 
 admin.site.register(Order, OrderAdmin)
