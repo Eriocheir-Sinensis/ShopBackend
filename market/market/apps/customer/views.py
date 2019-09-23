@@ -44,9 +44,8 @@ class LoginView(views.ObtainAuthToken, viewsets.ViewSet):
         user = serializer.validated_data['user']
         serialized = CustomerSerializer(user, context={'request': request}).data
         token, created = Token.objects.get_or_create(user=user)
-        serialized['token'] = token.key
         user_logged_in.send(sender=user.__class__, request=request, user=user)
-        return Response(serialized, status=status_code)
+        return Response({'user': serialized, 'token': token.key}, status=status_code)
 
 
 class CustomerCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -78,5 +77,4 @@ class CustomerCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         # TODO: verify phone
         # phone = request.data.get('phone', None)
         token, created = Token.objects.get_or_create(user=self.user)
-        serialized['token'] = token.key
-        return Response(serialized, status=status_code)
+        return Response({'user': serialized, 'token': token.key}, status=status_code)
