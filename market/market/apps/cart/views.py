@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets, mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -37,12 +37,23 @@ class CartViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.Gener
 class CartLineItemViewSet(mixins.DestroyModelMixin, mixins.UpdateModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = (IsAuthenticated, )
     serializer_class = CartLineItemSerializer
-    queryset = CartLineItem.objects.all()
+
+    def get_queryset(self):
+        return CartLineItem.objects.filter(customer=self.request.user)
 
     def create(self, request, *args, **kwargs):
+        cart = get_object_or_404(Cart, cid=kwargs.get('cart_id', None), customer=request.user)
+        crab_id = request.data.get('crab', None)
+        if cart.cart_line_items.filter(crab__cid=crab_id).exists():
+            # If crab already in cart.
+            line_item = cart.cart_line_items.get(crab__cid=crab_id)
+            line_item.amount += int(request.data.get('amount', 0))
+            line_item.save()
+            return Response(self.get_serializer(line_item.cart).data, status=status.HTTP_200_OK)
+
         data = {
-            'cart': Cart.objects.get(cid=kwargs.get('cart_id', None)).cid,
-            'crab': request.data.get('crab', None),
+            'cart': cart.cid,
+            'crab': crab_id,
             'amount': request.data.get('amount', None)
         }
         serializer = self.get_serializer(data=data)

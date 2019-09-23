@@ -29,14 +29,3 @@ class CrabImage(models.Model):
         verbose_name = _('图片')
         verbose_name_plural = _('图片')
 
-
-class LineItem(models.Model):
-    lid = models.AutoField(primary_key=True)
-    crab = models.ForeignKey(Crab, verbose_name=_('大闸蟹'), on_delete=models.CASCADE)
-    amount = models.IntegerField(_('数量'), default=0)
-
-    class Meta:
-        verbose_name = _('物品')
-        verbose_name_plural = _('物品')
-
-

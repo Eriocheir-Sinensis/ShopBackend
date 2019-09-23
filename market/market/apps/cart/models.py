@@ -23,6 +23,7 @@ class CartLineItem(models.Model):
     amount = models.IntegerField(_('数量'), default=0)
 
     class Meta:
+        unique_together = ('cart', 'crab')
         verbose_name = _('购物车物品')
         verbose_name_plural = _('购物车物品')
 

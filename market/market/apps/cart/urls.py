@@ -10,5 +10,5 @@ line_item_router.register(r'', CartLineItemViewSet, basename='cart_line_item')
 
 urlpatterns = [
     re_path(r'^(?P<cart_id>[\w]+)/', include(line_item_router.urls)),
-    re_path(r'^$', include(cart_router.urls)),
+    re_path(r'^', include(cart_router.urls)),
 ]

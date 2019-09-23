@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Crab, LineItem
+from .models import Crab
 
 
 class CrabSerializer(serializers.ModelSerializer):

@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from ..customer.models import Customer
-from ..goods.models import Crab, LineItem
+from ..goods.models import Crab
 
 ORDER_STATUS = (
     ("未付款", "未付款"),
