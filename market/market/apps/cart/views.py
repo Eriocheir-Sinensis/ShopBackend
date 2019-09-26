@@ -37,9 +37,10 @@ class CartViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.Gener
 class CartLineItemViewSet(mixins.DestroyModelMixin, mixins.UpdateModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = (IsAuthenticated, )
     serializer_class = CartLineItemSerializer
+    lookup_field = 'crab__cid'
 
     def get_queryset(self):
-        return CartLineItem.objects.filter(customer=self.request.user)
+        return CartLineItem.objects.filter(cart__customer=self.request.user)
 
     def create(self, request, *args, **kwargs):
         cart = get_object_or_404(Cart, cid=kwargs.get('cart_id', None), customer=request.user)
@@ -49,7 +50,7 @@ class CartLineItemViewSet(mixins.DestroyModelMixin, mixins.UpdateModelMixin, mix
             line_item = cart.cart_line_items.get(crab__cid=crab_id)
             line_item.amount += int(request.data.get('amount', 0))
             line_item.save()
-            return Response(self.get_serializer(line_item.cart).data, status=status.HTTP_200_OK)
+            return Response(CartSerializer(line_item.cart).data, status=status.HTTP_200_OK)
 
         data = {
             'cart': cart.cid,
@@ -60,7 +61,20 @@ class CartLineItemViewSet(mixins.DestroyModelMixin, mixins.UpdateModelMixin, mix
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(CartSerializer(cart).data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
-        return super().update(request, args, kwargs, partial=True)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        if request.data.get('amount', instance.amount) == '0':
+            self.perform_destroy(instance)
+        else:
+            self.perform_update(serializer)
+
+        return Response(CartSerializer(serializer.instance.cart).data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(CartSerializer(instance.cart).data)
