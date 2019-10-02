@@ -23,7 +23,7 @@ class Crab(models.Model):
 class CrabImage(models.Model):
     iid = models.AutoField(primary_key=True)
     crab = models.ForeignKey(Crab, related_name='images', on_delete=models.DO_NOTHING)
-    pic = models.ImageField(upload_to='img/crab_images/', verbose_name=_('图片'))
+    pic = models.ImageField(upload_to='api/img/crab_images/', verbose_name=_('图片'))
 
     class Meta:
         verbose_name = _('图片')

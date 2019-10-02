@@ -20,5 +20,4 @@ class CrabSerializer(serializers.ModelSerializer):
         )
 
     def get_images(self, obj):
-        request = self.context.get('request')
-        return [request.build_absolute_uri(i.pic.url) for i in obj.images.all()]
+        return [i.pic.url for i in obj.images.all()]
