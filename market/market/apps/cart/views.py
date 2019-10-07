@@ -10,6 +10,9 @@ class CartViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.Gener
     permission_classes = (IsAuthenticated, )
     serializer_class = CartSerializer
 
+    def get_serializer_context(self):
+        return {'request': self.request}
+
     def get_queryset(self):
         user = self.request.user
         return Cart.objects.filter(customer=user)
@@ -50,7 +53,7 @@ class CartLineItemViewSet(mixins.DestroyModelMixin, mixins.UpdateModelMixin, mix
             line_item = cart.cart_line_items.get(crab__cid=crab_id)
             line_item.amount += int(request.data.get('amount', 0))
             line_item.save()
-            return Response(CartSerializer(line_item.cart).data, status=status.HTTP_200_OK)
+            return Response(CartSerializer(line_item.cart, context={'request': request}).data, status=status.HTTP_200_OK)
 
         data = {
             'cart': cart.cid,
@@ -61,20 +64,20 @@ class CartLineItemViewSet(mixins.DestroyModelMixin, mixins.UpdateModelMixin, mix
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(CartSerializer(cart).data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(CartSerializer(cart, context={'request': request}).data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        if request.data.get('amount', instance.amount) == '0':
+        if str(request.data.get('amount', instance.amount)) == '0':
             self.perform_destroy(instance)
         else:
             self.perform_update(serializer)
 
-        return Response(CartSerializer(serializer.instance.cart).data)
+        return Response(CartSerializer(serializer.instance.cart, context={'request': request}).data)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
-        return Response(CartSerializer(instance.cart).data)
+        return Response(CartSerializer(instance.cart, context={'request': request}).data)

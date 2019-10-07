@@ -4,6 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import authenticate
 from .models import Cart, CartLineItem
 from ..goods.models import Crab
+from ..goods.serializers import CrabSerializer
 
 
 class CartLineItemSerializer(serializers.ModelSerializer):
@@ -11,6 +12,7 @@ class CartLineItemSerializer(serializers.ModelSerializer):
     cart = serializers.PrimaryKeyRelatedField(queryset=Cart.objects.all(), write_only=True)
     crab = serializers.PrimaryKeyRelatedField(queryset=Crab.objects.all())
     amount = serializers.IntegerField(default=0, min_value=0)
+    subtotal = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = CartLineItem
@@ -18,8 +20,16 @@ class CartLineItemSerializer(serializers.ModelSerializer):
             "id",
             "cart",
             "crab",
-            "amount"
+            "amount",
+            "subtotal",
         )
+
+    def get_subtotal(self, obj):
+        return obj.amount * obj.crab.price
+
+
+class CartLineItemDetailedSerializer(CartLineItemSerializer):
+    crab = CrabSerializer(read_only=True)
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -27,6 +37,7 @@ class CartSerializer(serializers.ModelSerializer):
     customer = serializers.PrimaryKeyRelatedField(queryset=Customer.objects.all())
     items = CartLineItemSerializer(many=True, source='cart_line_items', read_only=True)
     count = serializers.SerializerMethodField(read_only=True)
+    total = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Cart
@@ -34,8 +45,20 @@ class CartSerializer(serializers.ModelSerializer):
             "id",
             "customer",
             "items",
-            "count"
+            "count",
+            "total"
         )
+    
+    def __init__(self, *args, **kwargs):
+        super(CartSerializer, self).__init__(*args, **kwargs)
+        try:
+            if self.context['request'].query_params.get('detail', False):
+                self.fields['items'] = CartLineItemDetailedSerializer(many=True, source='cart_line_items', read_only=True)
+        except KeyError:
+            pass
 
     def get_count(self, obj):
         return sum([i.amount for i in obj.cart_line_items.all()])
+
+    def get_total(self, obj):
+        return sum([i.amount * i.crab.price for i in obj.cart_line_items.all()])

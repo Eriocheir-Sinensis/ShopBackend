@@ -1,5 +1,6 @@
 from rest_framework import status, viewsets, mixins
 from django.shortcuts import get_object_or_404
+from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -46,6 +47,14 @@ class LoginView(views.ObtainAuthToken, viewsets.ViewSet):
         token, created = Token.objects.get_or_create(user=user)
         user_logged_in.send(sender=user.__class__, request=request, user=user)
         return Response({'user': serialized, 'token': token.key}, status=status_code)
+
+
+class LogoutView(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request):
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)
 
 
 class CustomerCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
