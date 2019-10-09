@@ -15,6 +15,9 @@ class Order(models.Model):
     oid = models.AutoField(primary_key=True)
     customer = models.ForeignKey(Customer, verbose_name=_('客户'), on_delete=models.CASCADE)
     status = models.CharField(_('状态'), choices=ORDER_STATUS, max_length=10, default="未付款")
+    receiver_name = models.CharField(_('收件人姓名'), max_length=80)
+    receiver_phone = models.CharField(_('收件人电话'), max_length=80)
+    receiver_address = models.CharField(_('收件人地址'), max_length=80)
 
     class Meta:
         verbose_name = _('订单')

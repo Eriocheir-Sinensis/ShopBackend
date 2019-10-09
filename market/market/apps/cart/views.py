@@ -31,7 +31,7 @@ class CartViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.Gener
 
     def list(self, request, *args, **kwargs):
         user = self.request.user
-        cart = Cart.objects.get(customer=user)
+        cart = get_object_or_404(Cart, customer=user)
         serializer = self.get_serializer(cart)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)

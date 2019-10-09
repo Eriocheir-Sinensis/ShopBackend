@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'market.apps.customer',
     'market.apps.goods',
     'market.apps.order',
+    'market.apps.money',
 ]
 
 MIDDLEWARE = [
