@@ -9,7 +9,6 @@ from ..goods.serializers import CrabSerializer
 
 class OrderLineItemSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
-    order = serializers.PrimaryKeyRelatedField(queryset=Order.objects.all(), write_only=True)
     crab = serializers.PrimaryKeyRelatedField(queryset=Crab.objects.all())
     amount = serializers.IntegerField(default=0, min_value=0)
     subtotal = serializers.SerializerMethodField(read_only=True)
@@ -18,7 +17,6 @@ class OrderLineItemSerializer(serializers.ModelSerializer):
         model = OrderLineItem
         fields = (
             "id",
-            "order",
             "crab",
             "amount",
             "subtotal",
@@ -39,7 +37,7 @@ class OrderSerializer(serializers.ModelSerializer):
     receiver_name = serializers.CharField(required=True)
     receiver_phone = serializers.CharField(required=True)
     receiver_address = serializers.CharField(required=True)
-    items = OrderLineItemSerializer(many=True, source='order_line_items', read_only=True)
+    items = OrderLineItemSerializer(many=True, source='order_line_items')
     count = serializers.SerializerMethodField(read_only=True)
     total = serializers.SerializerMethodField(read_only=True)
 
@@ -73,8 +71,16 @@ class OrderSerializer(serializers.ModelSerializer):
         return sum([i.amount * i.crab.price for i in obj.order_line_items.all()])
 
     def validate(self, attrs):
-        pass
+        if len(attrs.get('order_line_items', [])) <= 0:
+            raise serializers.ValidationError("订单中没有商品")
+        return super().validate(attrs)
 
     def create(self, validated_data):
+        items = validated_data.pop('order_line_items')
         validated_data['customer'] = self.context.get('request').user
-        return super().create(validated_data)
+        order = Order.objects.create(**validated_data)
+        OrderLineItem.objects.bulk_create([
+            OrderLineItem(order=order, **item)
+            for item in items
+        ])
+        return order

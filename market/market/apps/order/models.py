@@ -23,6 +23,9 @@ class Order(models.Model):
         verbose_name = _('订单')
         verbose_name_plural = _('订单')
 
+    def description(self):
+        return "{}({})的订单共{}件".format(self.customer.name, self.customer.phone, self.order_line_items.count())
+
 
 class OrderLineItem(models.Model):
     id = models.AutoField(primary_key=True)

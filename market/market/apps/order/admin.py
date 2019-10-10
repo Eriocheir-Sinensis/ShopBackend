@@ -8,6 +8,7 @@ class OrderLineItemAdmin(admin.TabularInline):
 
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderLineItemAdmin, ]
+    list_display = ('description', 'status',)
 
 
 admin.site.register(Order, OrderAdmin)

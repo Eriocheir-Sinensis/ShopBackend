@@ -8,6 +8,7 @@ class MoneySerializer(serializers.ModelSerializer):
     class Meta:
         model = Money
         fields = (
+            "name",
             "description",
             "image"
         )
